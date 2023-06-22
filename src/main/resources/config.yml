@@ -1,0 +1,8 @@
+#Bedrock client for /pingserver and test connection
+BedrockClient:
+  ip: "0.0.0.0"
+  port: 19130
+#Test connection
+TestConnection:
+  ip: "play.cubecraft.net"
+  port: 19132
