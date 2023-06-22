@@ -63,7 +63,7 @@ public class PingServerCommand extends Command {
                 return true;
             }
             for (final PingServer ping : PingServer.getInstances()) {
-                sender.sendMessage(ping.getPrefix() + " " + ping.getPingAddress() + " " + ping.getPlayers());
+                sender.sendMessage(ping.getPrefix() + " " + ping.getPingAddress());
             }
             return true;
         }
