@@ -18,7 +18,7 @@ public class ServerConnect extends PluginBase {
     private void test(){
 
         final InetSocketAddress address = new InetSocketAddress("play.cubecraft.net", 19132);
-        final InetSocketAddress client = new InetSocketAddress("0.0.0.0", 19139);
+        final InetSocketAddress client = new InetSocketAddress("0.0.0.0", 19134);
 
         final PingServer ping = new PingServer(client, address);
 

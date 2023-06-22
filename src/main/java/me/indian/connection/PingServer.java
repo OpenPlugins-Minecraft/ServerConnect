@@ -13,50 +13,47 @@ import java.util.concurrent.atomic.AtomicReference;
 public class PingServer {
 
 
-    private final ExecutorService executorService;
-    private InetSocketAddress clientAddress;
-    private InetSocketAddress pingAddress;
+    private final InetSocketAddress clientAddress;
+    private final InetSocketAddress pingAddress;
     private BedrockClient client;
-    private boolean clientCreated;
-    private boolean clientConnected;
+    private final boolean clientCreated;
+    private final boolean clientConnected;
 
 
     public PingServer(final InetSocketAddress clientAddress, final InetSocketAddress address) {
-        this.executorService = Executors.newScheduledThreadPool(2);
-//        executorService.execute(() -> {
         this.pingAddress = address;
         this.clientAddress = clientAddress;
         this.clientCreated = this.tryToCreateClient();
         this.clientConnected = this.tryToConnect();
-//        });
     }
 
 
     public static void main(String[] args) {
         final InetSocketAddress address = new InetSocketAddress("play.cubecraft.net", 19132);
-        final InetSocketAddress client = new InetSocketAddress("0.0.0.0", 19139);
+        final InetSocketAddress client = new InetSocketAddress("0.0.0.0", 19134);
 
-        final PingServer ping = new PingServer(client, address);
+        ExecutorService executorService = Executors.newScheduledThreadPool(2);
+
+        executorService.execute(() -> {
+            final PingServer ping = new PingServer(client, address);
 
 
-        System.out.println("Created: " + ping.isClientCreated());
-        System.out.println("Connected: " + ping.isClientConnected());
+            System.out.println("Created: " + ping.isClientCreated());
+            System.out.println("Connected: " + ping.isClientConnected());
 
-        System.out.println("Gam type: " + ping.getGameType());
-        System.out.println("Protocol version: " + ping.getProtocolVersion());
-        System.out.println("Max players: " + ping.getMaxPlayers());
+            System.out.println("Gam type: " + ping.getGameType());
+            System.out.println("Protocol version: " + ping.getProtocolVersion());
+            System.out.println("Max players: " + ping.getMaxPlayers());
 
-        for (int i = 0; i < 5; i++) {
-            System.out.println("Sprawdzenie graczy nr " + i + " " + ping.getPlayers() + " / " + ping.getMaxPlayers());
+            for (int i = 0; i < 5; i++) {
+                System.out.println("Sprawdzenie graczy nr " + i + " " + ping.getPlayers() + " / " + ping.getMaxPlayers());
 //            try {
 //                Thread.sleep(2000);
 //            } catch (final InterruptedException e) {
 //                System.out.println("Wątek został przerwany.");
 //            }
-        }
-
-
-
+            }
+        });
     }
 
 
@@ -78,6 +75,7 @@ public class PingServer {
             return true;
         } catch (final Exception e) {
             System.out.println("Nie można połączyć clienta");
+            e.printStackTrace();
             return false;
         }
     }
