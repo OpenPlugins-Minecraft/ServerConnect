@@ -4,25 +4,61 @@ package me.indian.connection;
 import com.nukkitx.protocol.bedrock.BedrockClient;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 
 public class PingServer {
 
-    private final InetSocketAddress clientAddress;
-    private final InetSocketAddress pingAddress;
+
+    private final ExecutorService executorService;
+    private InetSocketAddress clientAddress;
+    private InetSocketAddress pingAddress;
     private BedrockClient client;
-    private final boolean clientCreated;
-    private final boolean clientConnected;
+    private boolean clientCreated;
+    private boolean clientConnected;
 
 
     public PingServer(final InetSocketAddress clientAddress, final InetSocketAddress address) {
+        this.executorService = Executors.newScheduledThreadPool(2);
+//        executorService.execute(() -> {
         this.pingAddress = address;
         this.clientAddress = clientAddress;
         this.clientCreated = this.tryToCreateClient();
         this.clientConnected = this.tryToConnect();
+//        });
     }
+
+
+    public static void main(String[] args) {
+        final InetSocketAddress address = new InetSocketAddress("play.cubecraft.net", 19132);
+        final InetSocketAddress client = new InetSocketAddress("0.0.0.0", 19139);
+
+        final PingServer ping = new PingServer(client, address);
+
+
+        System.out.println("Created: " + ping.isClientCreated());
+        System.out.println("Connected: " + ping.isClientConnected());
+
+        System.out.println("Gam type: " + ping.getGameType());
+        System.out.println("Protocol version: " + ping.getProtocolVersion());
+        System.out.println("Max players: " + ping.getMaxPlayers());
+
+        for (int i = 0; i < 5; i++) {
+            System.out.println("Sprawdzenie graczy nr " + i + " " + ping.getPlayers() + " / " + ping.getMaxPlayers());
+//            try {
+//                Thread.sleep(2000);
+//            } catch (final InterruptedException e) {
+//                System.out.println("Wątek został przerwany.");
+//            }
+        }
+
+
+
+    }
+
 
     private boolean tryToCreateClient() {
         try {
@@ -110,6 +146,6 @@ public class PingServer {
     }
 
     private void exit() {
-        System.exit(1);
+        Thread.currentThread().interrupt();
     }
 }
