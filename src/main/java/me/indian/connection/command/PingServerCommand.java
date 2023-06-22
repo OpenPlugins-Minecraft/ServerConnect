@@ -80,36 +80,41 @@ public class PingServerCommand extends Command {
 
 
         if (args[0].equalsIgnoreCase("info")) {
-            String ip = args[1];
-            int port;
-
-            if (ip.isEmpty()) {
-                sender.sendMessage(MessageUtil.colorize("&cIp cannot be empty!"));
-                return true;
-            }
-
             try {
-                port = Integer.parseInt(args[2]);
-            } catch (final NumberFormatException ex) {
-                sender.sendMessage(MessageUtil.colorize("&cPort must be an integer"));
-                return true;
+                String ip = args[1];
+                int port;
+
+                if (ip.isEmpty()) {
+                    sender.sendMessage(MessageUtil.colorize("&cIp cannot be empty!"));
+                    return true;
+                }
+
+                try {
+                    port = Integer.parseInt(args[2]);
+                } catch (final NumberFormatException ex) {
+                    sender.sendMessage(MessageUtil.colorize("&cPort must be an integer"));
+                    return true;
+                }
+
+                final PingServer ping = new PingServer("Command instance ", client, new InetSocketAddress(ip, port), this.plugin.getNukkitLogger());
+
+                ping.tryToConnect();
+
+                sender.sendMessage("Created: " + ping.isClientCreated());
+                sender.sendMessage("Connected: " + ping.isClientConnected());
+                sender.sendMessage("Gam type: " + ping.getGameType());
+                sender.sendMessage("Protocol version: " + ping.getProtocolVersion());
+                sender.sendMessage("Player count: " + ping.getPlayers());
+                sender.sendMessage("Max players: " + ping.getMaxPlayers());
+                ping.disconnect();
+                sender.sendMessage("Disconnected");
+            } catch (final ArrayIndexOutOfBoundsException exception) {
+            sender.sendMessage(MessageUtil.colorize("&cBad usage"));
             }
-
-            final PingServer ping = new PingServer("Command instance ", client, new InetSocketAddress(ip, port), this.plugin.getNukkitLogger());
-
-            ping.tryToConnect();
-
-            sender.sendMessage("Created: " + ping.isClientCreated());
-            sender.sendMessage("Connected: " + ping.isClientConnected());
-            sender.sendMessage("Gam type: " + ping.getGameType());
-            sender.sendMessage("Protocol version: " + ping.getProtocolVersion());
-            sender.sendMessage("Player count: " + ping.getPlayers());
-            sender.sendMessage("Max players: " + ping.getMaxPlayers());
-            ping.disconnect();
-            sender.sendMessage("Disconnected");
             return false;
         }
-        return false;
+
+        return true;
     }
 
     public InetSocketAddress getClient() {
