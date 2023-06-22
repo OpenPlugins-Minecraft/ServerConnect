@@ -1,4 +1,4 @@
-main: me.indian.connection.ServerConnect
+main: me.indian.connection.ServerConnectNukkit
 name: ServerConnection
 authors: [ IndianPL]
 description: ServerConnection plugin

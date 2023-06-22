@@ -5,7 +5,7 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandEnum;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import me.indian.connection.ServerConnect;
+import me.indian.connection.ServerConnectNukkit;
 import me.indian.connection.ping.PingServer;
 import me.indian.connection.util.MessageUtil;
 
@@ -14,10 +14,10 @@ import java.net.InetSocketAddress;
 public class PingServerCommand extends Command {
 
 
-    private final ServerConnect plugin;
+    private final ServerConnectNukkit plugin;
     private final InetSocketAddress client;
 
-    public PingServerCommand(final ServerConnect plugin) {
+    public PingServerCommand(final ServerConnectNukkit plugin) {
         super("pingserver", "Ping server command");
         commandParameters.clear();
 
@@ -95,14 +95,17 @@ public class PingServerCommand extends Command {
                 return true;
             }
 
-            final PingServer ping = new PingServer("Command instance ", client, new InetSocketAddress(ip, port));
+            final PingServer ping = new PingServer("Command instance ", client, new InetSocketAddress(ip, port), this.plugin.getNukkitLogger());
+
+            ping.tryToConnect();
+
             sender.sendMessage("Created: " + ping.isClientCreated());
             sender.sendMessage("Connected: " + ping.isClientConnected());
             sender.sendMessage("Gam type: " + ping.getGameType());
             sender.sendMessage("Protocol version: " + ping.getProtocolVersion());
             sender.sendMessage("Player count: " + ping.getPlayers());
             sender.sendMessage("Max players: " + ping.getMaxPlayers());
-            ping.disConnect();
+            ping.disconnect();
             sender.sendMessage("Disconnected");
             return false;
         }

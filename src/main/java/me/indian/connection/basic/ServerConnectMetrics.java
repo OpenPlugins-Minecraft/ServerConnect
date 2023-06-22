@@ -1,32 +1,27 @@
 package me.indian.connection.basic;
 
 import cn.nukkit.Server;
-import cn.nukkit.plugin.Plugin;
 import cn.nukkit.plugin.PluginLogger;
-import cn.nukkit.utils.Config;
-import me.indian.connection.ServerConnect;
-import me.indian.connection.util.ThreadUtil;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import me.indian.connection.ServerConnect;
+import me.indian.connection.ServerConnectNukkit;
 import me.indian.connection.ping.PingServer;
 import me.indian.connection.util.MessageUtil;
 
 public class ServerConnectMetrics {
 
-    private static final ExecutorService executorService = Executors.newSingleThreadExecutor(new ThreadUtil("ServerConnect Metrics Thread"));
-    private final ServerConnect plugin = ServerConnect.getInstance();
-    private final Server server = plugin.getServer();
-    private final PluginLogger logger = this.plugin.getLogger();
-    private final Metrics metrics = new Metrics(this.plugin);
-    public boolean enabled = this.metrics.isEnabled();
+    private final Server server;
+    private final PluginLogger logger;
+    private final Metrics metrics;
+    public boolean enabled;
+
+    public ServerConnectMetrics(final ServerConnectNukkit plugin) {
+        this.server = plugin.getServer();
+        this.logger = plugin.getLogger();
+        this.metrics = new Metrics(plugin);
+        this.enabled = this.metrics.isEnabled();
+    }
 
     public void run() {
-        executorService.execute(() -> {
+        new Thread(() -> {
             try {
                 if (!this.enabled) {
                     this.logger.info(MessageUtil.colorize("&aMetrics is disabled"));
@@ -37,10 +32,10 @@ public class ServerConnectMetrics {
                 this.logger.info(MessageUtil.colorize("&aLoaded Metrics"));
             } catch (final Exception e) {
                 this.logger.info(MessageUtil.colorize("&cCan't load metrics"));
-                    e.printStackTrace();
+                e.printStackTrace();
                 Thread.currentThread().interrupt();
             }
-        });
+        }).start();
     }
 
     private void customMetrics() {
