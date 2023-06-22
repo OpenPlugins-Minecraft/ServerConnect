@@ -1,0 +1,6 @@
+main: me.indian.connection.ServerConnect
+name: ServerConnection
+authors: [ IndianPL]
+description: ServerConnection plugin
+version: '${project.version}'
+api: [ "1.0.14" ]
