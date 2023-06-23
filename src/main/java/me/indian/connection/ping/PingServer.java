@@ -36,7 +36,9 @@ public class PingServer {
 
     private boolean tryToCreateClient() {
         try {
-            client = new BedrockClient(clientAddress);
+            this.client = new BedrockClient(clientAddress);
+            instances.add(this);
+            instanceCount++;
             return true;
         } catch (final Exception e) {
             logger.emergency(this.getPrefix() + "Nie można utworzyć clienta");
@@ -47,11 +49,10 @@ public class PingServer {
     public void tryToConnect() {
         logger.info(this.getPrefix() + "Próba połączenia z " + pingAddress);
         try {
+            this.disconnect();
             client.bind().join();
             logger.info(this.getPrefix() + "Połączono z " + pingAddress);
             clientConnected = true;
-            instanceCount++;
-             instances.add(this);
         } catch (final Exception e) {
             logger.emergency(this.getPrefix() + "Nie można połączyć clienta");
             e.printStackTrace();
@@ -64,7 +65,7 @@ public class PingServer {
         try {
             return this.client.ping(this.pingAddress).get().getPlayerCount();
         } catch (InterruptedException | ExecutionException e) {
-            return 0;
+            return -Integer.MAX_VALUE;
         }
     }
 
@@ -73,7 +74,7 @@ public class PingServer {
         try {
             return this.client.ping(this.pingAddress).get().getMaximumPlayerCount();
         } catch (InterruptedException | ExecutionException e) {
-            return 0;
+            return -Integer.MAX_VALUE;
         }
     }
 
@@ -91,7 +92,7 @@ public class PingServer {
         try {
             return this.client.ping(this.pingAddress).get().getProtocolVersion();
         } catch (InterruptedException | ExecutionException e) {
-            return 0;
+            return -Integer.MAX_VALUE;
         }
     }
 
@@ -118,6 +119,14 @@ public class PingServer {
         instances.remove(this);
     }
 
+    public BedrockClient getClient() {
+        return this.client;
+    }
+
+    public InetSocketAddress getClientAddress() {
+        return this.clientAddress;
+    }
+
     public InetSocketAddress getPingAddress() {
         return this.pingAddress;
     }
@@ -130,14 +139,58 @@ public class PingServer {
         return instances;
     }
 
+    public PingServer reconnect(){
+        boolean client = this.isClientCreated();
+        if(client){
+            boolean connected = this.isClientConnected();
+            if(connected){
+                this.disconnect();
+                this.tryToConnect();
+            } else {
+                final InetSocketAddress newClient = new InetSocketAddress(this.getClientAddress().getAddress(), this.getClientAddress().getPort() - 10);
+
+               PingServer newPingServer =  new PingServer("NEW "+ this.getPrefix(),newClient , this.getPingAddress(), logger );
+                newPingServer.tryToConnect();
+               if(newPingServer.clientConnected){
+                 return newPingServer;
+               }
+            }
+        } else {
+            this.tryToCreateClient();
+            this.tryToConnect();
+        }
+        return null;
+    }
+
     public static void disconnectAllInstances(){
         final List<PingServer> instanceList = getInstances();
         if (instanceList != null) {
             for (final PingServer ping : instanceList) {
                 if (ping.isClientConnected()) {
                     logger.info(MessageUtil.colorize("&aDisconnecting: &r" + ping.getPrefix() + ping.getPingAddress()));
-                    ping.disconnect();
+                    if (!ping.isClientConnected()) continue;
+                    logger.info(ping.getPrefix() + "Próba rozłączenia z " + ping.getPingAddress() + " ....");
+                    if (ping.getClient().getSession() != null) {
+                        ping.getClient().getSession().disconnect();
+                        logger.info(ping.getPrefix() + "Zamknieto sesie");
+                    } else {
+                        ping.getClient().close(true);
+                    }
+                    logger.info(ping.getPrefix() + "Rozłączono");
+                    --instanceCount;
+                    instances.remove(ping);
                     logger.info(MessageUtil.colorize("&aDisconnected"));
+                }
+            }
+        }
+    }
+
+    public static void connectAllNoConnected() {
+        final List<PingServer> instanceList = getInstances();
+        if (instanceList != null) {
+            for (final PingServer ping : instanceList) {
+                if (!ping.isClientConnected()) {
+                    ping.tryToConnect();
                 }
             }
         }

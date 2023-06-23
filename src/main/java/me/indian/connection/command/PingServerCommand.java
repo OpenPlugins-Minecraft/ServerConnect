@@ -5,17 +5,22 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandEnum;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
+import cn.nukkit.utils.TextFormat;
 import me.indian.connection.ServerConnectNukkit;
 import me.indian.connection.ping.PingServer;
 import me.indian.connection.util.MessageUtil;
+import me.indian.connection.util.ThreadUtil;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class PingServerCommand extends Command {
 
 
     private final ServerConnectNukkit plugin;
     private final InetSocketAddress client;
+    private final ExecutorService executorService;
 
     public PingServerCommand(final ServerConnectNukkit plugin) {
         super("pingserver", "Ping server command");
@@ -26,6 +31,12 @@ public class PingServerCommand extends Command {
         });
         commandParameters.put("instances", new CommandParameter[]{
                 CommandParameter.newEnum("instances", new CommandEnum("instances", "instances")),
+        });
+        commandParameters.put("connect", new CommandParameter[]{
+                CommandParameter.newEnum("connect", new CommandEnum("connect", "connect")),
+        });
+        commandParameters.put("reconnect", new CommandParameter[]{
+                CommandParameter.newEnum("reconnect", new CommandEnum("reconnect", "reconnect")),
         });
         commandParameters.put("disconnect", new CommandParameter[]{
                 CommandParameter.newEnum("disconnect", new CommandEnum("disconnect", "disconnect")),
@@ -41,6 +52,7 @@ public class PingServerCommand extends Command {
         final String clientIp = this.plugin.getConfig().getString("BedrockClient.ip", "0.0.0.0");
         final int clientPort = this.plugin.getConfig().getInt("BedrockClient.port", 19130);
         this.client = new InetSocketAddress(clientIp, clientPort);
+        this.executorService = Executors.newSingleThreadExecutor(new ThreadUtil("ServerConnect Ping command Thread"));
     }
 
     @Override
@@ -63,11 +75,21 @@ public class PingServerCommand extends Command {
                 return true;
             }
             for (final PingServer ping : PingServer.getInstances()) {
-                sender.sendMessage(ping.getPrefix() + " " + ping.getPingAddress());
+                sender.sendMessage(ping.getPrefix() + " " + ping.getPingAddress() + MessageUtil.colorize("&6") + " Connected: " + ping.isClientConnected());
             }
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("connect")) {
+            if (PingServer.getInstanceCount() == 0) {
+                sender.sendMessage(MessageUtil.colorize("&cThere are no active instances"));
+                return true;
+            }
+            sender.sendMessage(MessageUtil.colorize("&aTrying to connect all no connected instances"));
+            PingServer.connectAllNoConnected();
+            sender.sendMessage(MessageUtil.colorize("&aConnected all no connected instances"));
+            return true;
+        }
 
         if (args[0].equalsIgnoreCase("disconnect")) {
             if (PingServer.getInstanceCount() == 0) {
@@ -96,20 +118,22 @@ public class PingServerCommand extends Command {
                     return true;
                 }
 
-                final PingServer ping = new PingServer("Command instance ", client, new InetSocketAddress(ip, port), this.plugin.getNukkitLogger());
+                executorService.execute(() -> {
+                    final PingServer ping = new PingServer("Command instance ", client, new InetSocketAddress(ip, port), this.plugin.getNukkitLogger());
 
-                ping.tryToConnect();
+                    ping.tryToConnect();
 
-                sender.sendMessage("Created: " + ping.isClientCreated());
-                sender.sendMessage("Connected: " + ping.isClientConnected());
-                sender.sendMessage("Gam type: " + ping.getGameType());
-                sender.sendMessage("Protocol version: " + ping.getProtocolVersion());
-                sender.sendMessage("Player count: " + ping.getPlayers());
-                sender.sendMessage("Max players: " + ping.getMaxPlayers());
-                ping.disconnect();
-                sender.sendMessage("Disconnected");
+                    sender.sendMessage("Created: " + ping.isClientCreated());
+                    sender.sendMessage("Connected: " + ping.isClientConnected());
+                    sender.sendMessage("Gam type: " + ping.getGameType());
+                    sender.sendMessage("Protocol version: " + ping.getProtocolVersion());
+                    sender.sendMessage("Player count: " + ping.getPlayers());
+                    sender.sendMessage("Max players: " + ping.getMaxPlayers());
+                    ping.disconnect();
+                    sender.sendMessage("Disconnected");
+                });
             } catch (final ArrayIndexOutOfBoundsException exception) {
-            sender.sendMessage(MessageUtil.colorize("&cBad usage"));
+                sender.sendMessage(MessageUtil.colorize("&cBad usage"));
             }
             return false;
         }

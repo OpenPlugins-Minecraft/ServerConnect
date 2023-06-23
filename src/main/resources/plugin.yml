@@ -1,5 +1,5 @@
 main: me.indian.connection.ServerConnectNukkit
-name: ServerConnection
+name: ServerConnect
 authors: [ IndianPL]
 description: ServerConnection plugin
 version: '${project.version}'
