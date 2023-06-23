@@ -31,7 +31,6 @@ public class PingServer {
         this.pingAddress = address;
         this.clientAddress = clientAddress;
         this.clientCreated = this.tryToCreateClient();
-        instances.add(this);
     }
 
 
@@ -52,6 +51,7 @@ public class PingServer {
             logger.info(this.getPrefix() + "Połączono z " + pingAddress);
             clientConnected = true;
             instanceCount++;
+             instances.add(this);
         } catch (final Exception e) {
             logger.emergency(this.getPrefix() + "Nie można połączyć clienta");
             e.printStackTrace();
