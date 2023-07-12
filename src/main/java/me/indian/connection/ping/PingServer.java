@@ -83,7 +83,7 @@ public class PingServer {
         try {
             return this.client.ping(this.pingAddress).get().getGameType();
         } catch (InterruptedException | ExecutionException e) {
-            return "";
+            return "Not connected";
         }
     }
 
@@ -92,7 +92,7 @@ public class PingServer {
         try {
             return this.client.ping(this.pingAddress).get().getVersion();
         } catch (InterruptedException | ExecutionException e) {
-            return "";
+            return "Not connected";
         }
     }
 
