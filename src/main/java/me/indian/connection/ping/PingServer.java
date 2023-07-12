@@ -87,6 +87,15 @@ public class PingServer {
         }
     }
 
+    public String getVersion() {
+        if (!this.isClientConnected()) return "Not connected";
+        try {
+            return this.client.ping(this.pingAddress).get().getVersion();
+        } catch (InterruptedException | ExecutionException e) {
+            return "";
+        }
+    }
+
     public int getProtocolVersion() {
         if (!this.isClientConnected()) return 0;
         try {
