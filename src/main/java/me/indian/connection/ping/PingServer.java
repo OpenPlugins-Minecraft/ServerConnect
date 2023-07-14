@@ -3,6 +3,7 @@ package me.indian.connection.ping;
 
 import com.nukkitx.protocol.bedrock.BedrockClient;
 import me.indian.connection.logger.ConnectorLogger;
+import me.indian.connection.util.ThreadUtil;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import me.indian.connection.util.ThreadUtil;
 
 
 public class PingServer {
@@ -45,7 +45,7 @@ public class PingServer {
             instanceCount++;
             return true;
         } catch (final Exception e) {
-            logger.emergency(this.getPrefix() + "Nie można utworzyć clienta");
+            logger.critical(this.getPrefix() + "Nie można utworzyć clienta");
             return false;
         }
     }
@@ -59,7 +59,7 @@ public class PingServer {
             logger.info(this.getPrefix() + "Połączono z " + pingAddress);
             clientConnected = true;
         } catch (final Exception e) {
-            logger.emergency(this.getPrefix() + "Nie można połączyć clienta");
+            logger.critical(this.getPrefix() + "Nie można połączyć clienta");
             e.printStackTrace();
             clientConnected = false;
         }

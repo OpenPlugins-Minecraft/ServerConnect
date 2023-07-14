@@ -11,38 +11,29 @@ public class NukkitLogger implements ConnectorLogger {
         this.logger = logger;
     }
 
-    @Override
-    public void emergency(final String log) {
-        this.logger.emergency(log);
-    }
 
-    @Override
-    public void alert(final String log) {
-        this.logger.alert(log);
-    }
-
-    @Override
-    public void critical(final String log) {
-        this.logger.critical(log);
-    }
-
-    @Override
-    public void error(final String log) {
-        this.logger.error(log);
-    }
-
-    @Override
-    public void warning(final String log) {
-        this.logger.warning(log);
-    }
-
-    @Override
-    public void notice(final String log) {
-        this.logger.notice(log);
-    }
-
-    @Override
-    public void info(final String log) {
+    public void alert(String log) {
         this.logger.info(log);
     }
+
+
+    public void critical(String log) {
+        this.logger.info(log);
+    }
+
+
+    public void error(String log) {
+        this.logger.info(log);
+    }
+
+
+    public void warning(String log) {
+        this.logger.info(log);
+    }
+
+
+    public void info(String log) {
+        this.logger.info(log);
+    }
+
 }

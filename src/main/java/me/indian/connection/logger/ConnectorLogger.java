@@ -1,21 +1,15 @@
 package me.indian.connection.logger;
 
-
 public interface ConnectorLogger {
 
+    void alert(String var1);
 
-    void emergency(final String log);
+    void critical(String var1);
 
-    void alert(final String log);
+    void error(String var1);
 
-    void critical(final String log);
+    void warning(String var1);
 
-    void error(final String log);
-
-    void warning(final String log);
-
-    void notice(final String log);
-
-    void info(final String log);
+    void info(String var1);
 
 }

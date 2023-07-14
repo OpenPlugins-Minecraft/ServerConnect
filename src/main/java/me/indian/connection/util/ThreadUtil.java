@@ -1,6 +1,6 @@
 package me.indian.connection.util;
 
-
+import java.lang.management.ManagementFactory;
 import java.util.concurrent.ThreadFactory;
 
 public class ThreadUtil implements ThreadFactory {
@@ -45,5 +45,14 @@ public class ThreadUtil implements ThreadFactory {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static int getThreadsCount() {
+        int availableProcessors = 5;
+        try {
+            availableProcessors = ManagementFactory.getThreadMXBean().getThreadCount();
+        } catch (Exception ignore) {
+        }
+        return availableProcessors;
     }
 }
