@@ -66,20 +66,20 @@ public class PingServer {
     }
 
     public int getPlayers() {
-        if (!this.isClientConnected()) return 0;
+        if (!this.isClientConnected()) return -1;
         try {
             return this.client.ping(this.pingAddress).get().getPlayerCount();
         } catch (InterruptedException | ExecutionException e) {
-            return 0;
+            return -1;
         }
     }
 
     public int getMaxPlayers() {
-        if (!this.isClientConnected()) return 0;
+        if (!this.isClientConnected()) return -1;
         try {
             return this.client.ping(this.pingAddress).get().getMaximumPlayerCount();
         } catch (InterruptedException | ExecutionException e) {
-            return 0;
+            return -1;
         }
     }
 
@@ -102,11 +102,11 @@ public class PingServer {
     }
 
     public int getProtocolVersion() {
-        if (!this.isClientConnected()) return 0;
+        if (!this.isClientConnected()) return -1;
         try {
             return this.client.ping(this.pingAddress).get().getProtocolVersion();
         } catch (InterruptedException | ExecutionException e) {
-            return 0;
+            return -1;
         }
     }
 
