@@ -3,12 +3,14 @@ package me.indian.connection.ping;
 
 import com.nukkitx.protocol.bedrock.BedrockClient;
 import me.indian.connection.logger.ConnectorLogger;
-import me.indian.connection.util.MessageUtil;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import me.indian.connection.util.ThreadUtil;
 
 
 public class PingServer {
@@ -23,6 +25,7 @@ public class PingServer {
     private BedrockClient client;
     private final boolean clientCreated;
     private boolean clientConnected = false;
+    private final ExecutorService service;
 
 
     public PingServer(final String prefix, final InetSocketAddress clientAddress, final InetSocketAddress address, final ConnectorLogger logger) {
@@ -31,6 +34,7 @@ public class PingServer {
         this.pingAddress = address;
         this.clientAddress = clientAddress;
         this.clientCreated = this.tryToCreateClient();
+        this.service = Executors.newScheduledThreadPool(10 , new ThreadUtil("PingServer Thread "));
     }
 
 
@@ -50,6 +54,7 @@ public class PingServer {
         logger.info(this.getPrefix() + "Próba połączenia z " + pingAddress);
         try {
             this.disconnect();
+            ThreadUtil.sleep(2);
             client.bind().join();
             logger.info(this.getPrefix() + "Połączono z " + pingAddress);
             clientConnected = true;
@@ -105,6 +110,19 @@ public class PingServer {
         }
     }
 
+
+//    public void get(){
+//
+//        if (!this.isClientConnected()) return ;
+//        try {
+//            this.client.ping(pingAddress).
+//        } catch (InterruptedException | ExecutionException e) {
+//            return ;
+//        }
+//
+//
+//    }
+
     public boolean isClientCreated() {
         return this.clientCreated;
     }
@@ -116,6 +134,7 @@ public class PingServer {
     public void disconnect() {
         if (!this.isClientConnected()) return;
         logger.info(this.getPrefix() + "Próba rozłączenia z " + pingAddress + " ....");
+        client.getRakNet().close();
         if (client.getSession() != null) {
             client.getSession().disconnect();
             logger.info(this.getPrefix() + "Zamknieto sesie");
@@ -149,26 +168,10 @@ public class PingServer {
     }
 
     public PingServer reconnect(){
-        boolean client = this.isClientCreated();
-        if(client){
-            boolean connected = this.isClientConnected();
-            if(connected){
-                this.disconnect();
-                this.tryToConnect();
-            } else {
-                final InetSocketAddress newClient = new InetSocketAddress(this.getClientAddress().getAddress(), this.getClientAddress().getPort() - 10);
-
-               PingServer newPingServer =  new PingServer("NEW "+ this.getPrefix(),newClient , this.getPingAddress(), logger );
-                newPingServer.tryToConnect();
-               if(newPingServer.clientConnected){
-                 return newPingServer;
-               }
-            }
-        } else {
-            this.tryToCreateClient();
-            this.tryToConnect();
-        }
-        return null;
+        this.disconnect();
+        final PingServer pingServer =  new PingServer("NEW "+ this.getPrefix(), clientAddress , this.getPingAddress(), logger );
+        pingServer.tryToConnect();
+        return pingServer;
     }
 
     public static void disconnectAllInstances(){
@@ -176,7 +179,7 @@ public class PingServer {
         if (instanceList != null) {
             for (final PingServer ping : instanceList) {
                 if (ping.isClientConnected()) {
-                    logger.info(MessageUtil.colorize("&aDisconnecting: &r" + ping.getPrefix() + ping.getPingAddress()));
+                    logger.info("Disconnecting: " + ping.getPrefix() + ping.getPingAddress());
                     if (!ping.isClientConnected()) continue;
                     logger.info(ping.getPrefix() + "Próba rozłączenia z " + ping.getPingAddress() + " ....");
                     if (ping.getClient().getSession() != null) {
@@ -188,7 +191,7 @@ public class PingServer {
                     logger.info(ping.getPrefix() + "Rozłączono");
                     --instanceCount;
                     instances.remove(ping);
-                    logger.info(MessageUtil.colorize("&aDisconnected"));
+                    logger.info("Disconnected");
                 }
             }
         }
