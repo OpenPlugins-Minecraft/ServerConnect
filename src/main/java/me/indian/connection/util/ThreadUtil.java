@@ -21,6 +21,31 @@ public class ThreadUtil implements ThreadFactory {
         this.threadCount = 0;
     }
 
+    public static void sleep(final int seconds) {
+        try {
+            Thread.sleep(1000 * seconds);
+        } catch (final InterruptedException exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    public static void sleep(final long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (final InterruptedException exception) {
+            exception.printStackTrace();;
+        }
+    }
+
+    public static int getThreadsCount() {
+        int availableThreads = 2;
+        try {
+            availableThreads = ManagementFactory.getThreadMXBean().getThreadCount();
+        } catch (final Exception ignore) {
+        }
+        return availableThreads;
+    }
+
     @Override
     public Thread newThread(final Runnable runnable) {
         Thread thread = new Thread(runnable);
@@ -37,22 +62,5 @@ public class ThreadUtil implements ThreadFactory {
     private String generateThreadName() {
         this.threadCount++;
         return this.threadName.replace("%b", String.valueOf(threadCount));
-    }
-
-    public static void sleep(final int seconds) {
-        try {
-            Thread.sleep(1000 * seconds);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static int getThreadsCount() {
-        int availableProcessors = 5;
-        try {
-            availableProcessors = ManagementFactory.getThreadMXBean().getThreadCount();
-        } catch (Exception ignore) {
-        }
-        return availableProcessors;
     }
 }

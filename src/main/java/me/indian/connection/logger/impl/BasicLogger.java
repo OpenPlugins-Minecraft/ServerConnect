@@ -15,7 +15,7 @@ public class BasicLogger implements ConnectorLogger {
 
     private void updatePrefix() {
         String logStateColor = logState.getColorCode();
-        prefix = ConsoleColors.BRIGHT_GREEN + "PingServer" +
+        prefix = ConsoleColors.BRIGHT_GREEN + "PingServer " +
                 ConsoleColors.BRIGHT_GREEN + "[" + ConsoleColors.BRIGHT_GRAY +
                 Thread.currentThread().getName()
                 + ConsoleColors.BRIGHT_GREEN + "]" +
